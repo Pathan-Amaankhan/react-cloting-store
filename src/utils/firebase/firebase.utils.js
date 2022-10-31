@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 import { getFirestore, doc, getDoc, setDoc, collection, writeBatch, query, getDocs } from 'firebase/firestore';
-import {queries} from "@testing-library/react";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDYlZoxyXjLySux3aekzJjldB0q9_8fdnw",
