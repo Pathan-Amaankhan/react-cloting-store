@@ -1,16 +1,16 @@
-import './checkout.styles.scss';
 import {useContext} from "react";
 import {CartContext} from "../../contexts/cart.context";
 import CheckoutItem from "../../components/checkout-item/checkout-item.component";
 import {Link} from "react-router-dom";
 import Button from "../../components/button/button.component";
+import {CheckoutContainer, CheckoutHeader, EmptyMessage, Total} from "./checkout.styles";
 
 const Checkout = () => {
     const { cartItems, cartCount, cartTotal } = useContext(CartContext);
 
     return (
-        <div className='checkout-container'>
-            <div className='checkout-header'>
+        <CheckoutContainer>
+            <CheckoutHeader>
                 <div className='header-block'>
                     <span>Product</span>
                 </div>
@@ -26,26 +26,24 @@ const Checkout = () => {
                 <div className='header-block'>
                     <span>Remove</span>
                 </div>
-            </div>
+            </CheckoutHeader>
 
             {
                 cartCount ?
                     cartItems.map( ( cartItem ) => ( <CheckoutItem key={cartItem.id} checkoutItem={cartItem} /> ) ) :
                     (
-                        <div className='empty-message'>
+                        <EmptyMessage>
                             <span className='message-text'>Cart is empty</span>
 
                             <Link to='/shop'>
                                 <Button>Shop Now</Button>
                             </Link>
-                        </div>
+                        </EmptyMessage>
                     )
             }
 
-            <div className='total'>
-                Total: ${ cartTotal }
-            </div>
-        </div>
+            <Total> Total: ${ cartTotal } </Total>
+        </CheckoutContainer>
     );
 }
 
