@@ -1,4 +1,4 @@
-import {createContext, useEffect, useReducer} from "react";
+import {createContext, useReducer} from "react";
 
 const addCartItem = ( cartItems, productToAdd ) => {
 
@@ -41,8 +41,6 @@ export const CartContext = createContext( INITIAL_STATE );
 const CART_ACTION_TYPE = {
     UPDATE_SHOW_CART: 'UPDATE_SHOW_CART',
     UPDATE_CART_ITEMS: 'UPDATE_CART_ITEMS',
-    UPDATE_CART_COUNT: 'UPDATE_CART_COUNT',
-    UPDATE_CART_TOTAL: 'UPDATE_CART_TOTAL',
 };
 
 const CartReducer = ( state, action ) => {
@@ -55,32 +53,9 @@ const CartReducer = ( state, action ) => {
                 showCart: payload.showCart,
             }
         case CART_ACTION_TYPE.UPDATE_CART_ITEMS:
-            const getCartItems = ( state, payload ) => {
-                switch ( payload.action ) {
-                    case 'add':
-                        return addCartItem( state.cartItems, payload.product );
-                    case 'remove':
-                        return removeCartItem( state.cartItems, payload.product );
-                    case 'clear':
-                        return clearCartItem( state.cartItems, payload.product );
-                    default:
-                        return state.cartItems;
-                }
-            };
-
             return {
                 ...state,
-                cartItems: getCartItems( state, payload ),
-            }
-        case CART_ACTION_TYPE.UPDATE_CART_COUNT:
-            return {
-                ...state,
-                cartCount: payload.count
-            }
-        case CART_ACTION_TYPE.UPDATE_CART_TOTAL:
-            return {
-                ...state,
-                cartTotal: payload.total
+                ...payload,
             }
         default:
             throw new Error( `Unhandled type ${type} in CartReducer` );
@@ -90,26 +65,29 @@ const CartReducer = ( state, action ) => {
 export const CartProvider = ( { children } ) => {
     const [ { showCart, cartItems, cartCount, cartTotal }, dispatch ] = useReducer( CartReducer, INITIAL_STATE );
 
-    useEffect( () => {
-        const count = cartItems.reduce( ( accumulator, currentValue ) => accumulator + currentValue.quantity, 0 );
-        dispatch( { type: CART_ACTION_TYPE.UPDATE_CART_COUNT,  payload: { count } } );
-    }, [ cartItems ] );
+    const updateCartReducer = ( newCartItems ) => {
+        let payload = {};
 
-    useEffect( () => {
-        const total = cartItems.reduce( ( accumulator, currentValue ) => ( currentValue.quantity * currentValue.price ) + accumulator, 0 );
-        dispatch( { type: CART_ACTION_TYPE.UPDATE_CART_TOTAL, payload: { total } } );
-    }, [ cartItems ] );
+        payload['cartItems'] = newCartItems;
+        payload['cartCount'] = newCartItems.reduce( ( accumulator, currentValue ) => accumulator + currentValue.quantity, 0 );
+        payload['cartTotal'] = newCartItems.reduce( ( accumulator, currentValue ) => ( currentValue.quantity * currentValue.price ) + accumulator, 0 );
+
+        dispatch( { type: CART_ACTION_TYPE.UPDATE_CART_ITEMS, payload: payload } );
+    }
 
     const addItemToCart = ( product ) => {
-        dispatch( { type: CART_ACTION_TYPE.UPDATE_CART_ITEMS, payload: { product, action: 'add' } } );
+        const newCartItems = addCartItem( cartItems, product );
+        updateCartReducer( newCartItems );
     }
 
     const removeItemFromCart = ( product ) => {
-        dispatch( { type: CART_ACTION_TYPE.UPDATE_CART_ITEMS, payload: { product, action: 'remove' } } );
+        const newCartItems = removeCartItem( cartItems, product );
+        updateCartReducer( newCartItems );
     }
 
     const clearItemFromCart = ( product ) => {
-        dispatch( { type: CART_ACTION_TYPE.UPDATE_CART_ITEMS, payload: { product, action: 'clear' } } );
+        const newCartItems = clearCartItem( cartItems, product );
+        updateCartReducer( newCartItems );
     }
 
     const setShowCart = ( showCart ) => {
